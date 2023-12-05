@@ -1,18 +1,22 @@
 import random as r
 import time
+import json
+import csv
+import os
 
 dmg = r.randint(1, 6) / 2
 hp = r.randint(1, 6) / 2
-coins = r.randint(0,3)
-srok_year = r.randint (0,3)
-srok_mouth = r.randint (0,12)
+coins = r.randint(0, 3)
+srok_year = r.randint(0, 3)
+srok_mouth = r.randint(0, 12)
 def InitGame():
-    age = r.randint(18,55)
+
+    age = r.randint(18, 55)
     speshs = ["Любит постарше", "Злоупотребляет игрой в покер", "Работал во Вкусно и точка", "Коллекцианирует фантики от жвачек"]
     spesh = r.choice(speshs)
     osys = ["незаконный митинг", "вождение в нетрезвом состоянии", "убийство", "хранение наркотиков"]
     osy = r.choice(osys)
-    name = input("Добро пожаловать в тюрягу, как твое имя салага?\n")
+    name = str (input("Добро пожаловать в тюрягу, как твое имя салага?\n"))
     print(f"Ну что, {name}, распологайся на зоне, вот твое дело:")
     print("-----------------------")
     print("Возраст: {0}".format(age))
@@ -21,7 +25,7 @@ def InitGame():
     print("Здоровье: {0}".format(hp))
     print("Монеты: {0}. ".format(coins))
     print("Осужден за {0}".format(osy))
-    print("Срок: {0}г.{1} мес.".format(srok_year,srok_mouth))
+    print("Срок: {0}г.{1} мес.".format(srok_year, srok_mouth))
 
 def Eat():
     global hp
@@ -87,7 +91,7 @@ def con():
     else:
         srok_mouth -= 1
     return srok_mouth
-    return srok_year
+
 
 def Hp():
     global hp
@@ -119,7 +123,7 @@ def Hp():
     else:
         srok_mouth -= 1
     return srok_mouth
-    return srok_year
+
 
 def stat():
     print(f"У тебя {hp} жизней, {dmg} урона, {coins} монет")
@@ -136,7 +140,7 @@ def Sport():
     chose = int(input())
     if chose == 1:
         print("Вы подходите к штанге и начинаете тренировку")
-        a = r.randint(0,3)
+        a = r.randint(0, 3)
         if a == 0:
             print("Вы в поте лица занимались продолжительное время и улучшили силу на 0.5 ")
             dmg += 0.5
@@ -152,12 +156,13 @@ def Sport():
     elif chose == 3:
         kvest()
     return dmg
-    return hp
+
 def kvest():
     global name
     global coins
     if input(f"-Дарова чепух, хочешь подзаработать? да/нет").lower() == "да":
-        print(f"Отлично, у меня для тебя есть особое задание, нужно будет собрать бычки от сигарет\n Принеси мне 100 бычков и получишь 5 золотых")
+        print(f"Отлично, у меня для тебя есть особое задание, нужно будет собрать бычки от сигарет\n "
+              f"Принеси мне 100 бычков и получишь 5 золотых")
         print("---------------------")
         print("Вы отпарвились собирать бычки")
         i = 1
@@ -231,18 +236,61 @@ def draka():
         elif hp <= 0:
             break
     return hp
-    return srok_year
+
+
+def save_to_json():
+    data = {
+
+        "hp": hp,
+        "dmg": dmg,
+        "srok_year": srok_year,
+        "srok_mouth": srok_mouth
+    }
+    with open("game_data.json", "w") as f:
+        json.dump(data, f)
+
+def save_to_csv():
+    data = [hp, dmg, srok_year, srok_mouth]
+    with open("game_data.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["hp", "dmg", "srok_year", "srok_mouth"])
+        writer.writerow(data)
+
+def delete_save_file(filename):
+    if os.path.exists(filename):
+        os.remove(filename)
+        print(f"Файл '{filename}' успешно удален.")
+    else:
+        print(f"Файл '{filename}' не существует.")
 
 InitGame()
 con()
+
 while True:
     if hp <= 0:
         print("Вы умерли(((")
         if input("Хотите начать заного? да/нет ").lower() == "да":
             hp = r.randint(1, 6) / 2
             InitGame()
+        if input("Хотите сохранить игру? да нет ").lower() == "да":
+            print("1.Сохранить в JSON")
+            print("2.Сохранить в csv")
+            print("3.Удалить сохранение")
+            invet = int(input())
+            if invet == 1:
+                save_to_json()
+                print("Данные сохранены ")
+                break
+            if invet == 2:
+                save_to_csv()
+                print("Данные сохранены ")
+                break
+            if invet == 3:
+                delete_save_file("game_data.json")
+                print("Данные удалены")
+                break
         else:
-            print("Ну и пожалуйста")
+            print("ДОсвидания")
             break
     situation = r.randint(0, 10)
     print(f"Осталось отматать {srok_year}г. {srok_mouth} мес.")
@@ -266,12 +314,23 @@ while True:
         if input("Ну или все таки хотите начать заного? да/нет ").lower() == "да":
             hp = r.randint(1, 6) / 2
             dmg = r.randint(1, 6) / 2
-            hp = r.randint(1, 6) / 2
             coins = r.randint(1,3)
             srok_year = r.randint (0,3)
             srok_mouth = r.randint (0,12)
             InitGame()
             con()
+        if input("{Хотите сохранить игру? да нет ").lower() == "да":
+            print("1.Сохранить в JSON")
+            print("2.Сохранить в csv")
+            invet = int(input())
+            if invet == 1:
+                save_to_json()
+                print("Данные сохранены ")
+                break
+            if  invet == 2:
+                save_to_csv()
+                print("Данные сохранены ")
+                break
         else:
             print("Досвидос)))")
             break
